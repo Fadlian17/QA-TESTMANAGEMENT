@@ -1,0 +1,11 @@
+{
+    "project": "Project A",
+    "total": 10,
+    "result": {
+      "Passed": 6,
+      "Failed": 2,
+      "Not Started": 2
+    },
+    "sentAt": "2025-03-29T10:21:00Z"
+ }
+  

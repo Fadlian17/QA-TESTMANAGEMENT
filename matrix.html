@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Matriks Coverage | QA Test Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen" onload="checkLogin(); checkAccess('admin'); loadProjectList();">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-10">
+    <a href="dashboard.html" class="flex items-center gap-2">
+      <img src="assets/img/logo.svg" alt="Logo" class="w-8 h-auto">
+      <span class="text-xl font-bold text-indigo-600 hover:underline">QA Test Management</span>
+    </a>
+    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Logout</button>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto mt-8 px-4">
+    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+      <div class="flex items-center gap-3">
+        <label for="projectMatrix" class="text-sm font-semibold text-gray-700">📂 Pilih Project:</label>
+        <select id="projectMatrix" onchange="onProjectSelect()" class="border px-3 py-2 rounded min-w-[200px] text-sm">
+          <!-- project list loaded dynamically -->
+        </select>
+      </div>
+      <button onclick="exportMatrixPDF()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm">
+        📄 Export PDF Matriks
+      </button>
+    </div>
+
+    <!-- Progress Coverage -->
+    <div id="coverageProgress" class="mb-4 text-sm text-gray-700 font-medium">
+      <!-- rendered by JS -->
+    </div>
+
+    <!-- Loader -->
+    <div id="loading" class="hidden text-gray-500 text-sm mb-3">⏳ Memuat data...</div>
+
+    <!-- Empty State -->
+    <div id="noData" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 mb-4 rounded">
+      ⚠️ Belum ada test case untuk project ini.
+    </div>
+
+    <!-- Matrix Table -->
+    <div class="overflow-x-auto bg-white rounded shadow">
+      <table id="matrixTable" class="table-auto w-full text-sm border border-gray-200">
+        <thead class="bg-gray-100 text-gray-700">
+          <tr>
+            <th class="p-2 border">Requirement</th>
+            <th class="p-2 border">Scenario</th>
+            <th class="p-2 border">Test Case</th>
+            <th class="p-2 border">Status</th>
+          </tr>
+        </thead>
+        <tbody id="matrixBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/matrix.js"></script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tentang | QA Test Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans leading-relaxed">
+
+  <main class="max-w-5xl mx-auto py-12 px-4">
+    <h1 class="text-3xl font-bold text-indigo-600 mb-6">📘 QA Test Management Platform</h1>
+    <a href="dashboard.html" class="text-sm text-indigo-600 hover:underline">⬅ Kembali ke Dashboard</a>
+    <p class="mb-6">Platform web ringan untuk membantu tim QA mengelola test case, requirement, pelaksanaan testing, visualisasi hasil, dan pelaporan secara terpusat dan fleksibel.</p>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-3">🧰 Fitur Utama</h2>
+      <ul class="list-disc list-inside space-y-2">
+        <li><strong>Test Case Management</strong>: CRUD test case, penjadwalan, status, label, versi, log, navigasi, dan export CSV/XLSX/PDF.</li>
+        <li><strong>Requirement Management</strong>: Form lengkap dengan user flow, device, performance, recovery, serta upload diagram dan export PDF.</li>
+        <li><strong>Reporting & Visualisasi</strong>: Pie/Bar chart, AI Suggestions & Summary, matrix coverage, progress, export chart ke PDF.</li>
+        <li><strong>Setup Proyek</strong>: Form setup dengan rangkuman, link, gambar, dan export ke PDF.</li>
+      </ul>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-3">🧪 Teknologi</h2>
+      <p>Stack teknologi ringan berbasis:</p>
+      <ul class="list-disc list-inside space-y-1 mt-2">
+        <li>HTML, CSS, JavaScript</li>
+        <li>Tailwind CSS untuk styling responsif</li>
+        <li>Chart.js, jsPDF, SheetJS</li>
+        <li>Penyimpanan data via <code>localStorage</code> (tanpa backend)</li>
+      </ul>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-3">📂 Struktur Folder</h2>
+      <pre class="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
+├── index.html
+├── dashboard.html
+├── project.html
+├── result.html
+├── matrix.html
+├── requirement.html
+├── project_setup.html
+├── about.html
+├── assets/
+│   ├── js/
+│   ├── img/
+      </pre>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-3">🚀 Cara Menjalankan</h2>
+      <ol class="list-decimal list-inside space-y-2">
+        <li>Clone repository ini: <code>git clone ...</code></li>
+        <li>Buka <code>index.html</code> di browser</li>
+        <li>Login/Register, lalu mulai membuat project</li>
+      </ol>
+      <p class="text-sm text-gray-600 mt-2">⚠️ Semua data tersimpan di browser menggunakan localStorage.</p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-3">📬 Rencana Integrasi</h2>
+      <ul class="list-disc list-inside space-y-2">
+        <li>Pengiriman laporan via Email/Slack/Odoo</li>
+        <li>Integrasi ke pipeline CI/CD</li>
+        <li>Penggabungan laporan test + setup + requirement</li>
+      </ul>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-3">🧠 Kontribusi</h2>
+      <p>Project ini terbuka untuk tim QA, freelance QA, dan pengembangan internal.</p>
+      <p class="mt-2">Pull request, fork, dan kontribusi sangat dihargai! 🤝</p>
+    </section>
+
+    <footer class="text-center text-sm text-gray-500 mt-10">
+      Dibuat dengan ❤️ oleh Tim QA • MIT License
+    </footer>
+  </main>
+
+</body>
+</html>

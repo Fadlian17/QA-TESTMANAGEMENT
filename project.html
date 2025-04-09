@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Test Case - Project</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen" onload="checkLogin(); loadProjectPage();">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-10">
+    <a href="dashboard.html" class="flex items-center gap-2">
+      <img src="assets/img/logo.svg" alt="Logo" class="w-8 sm:w-10 md:w-12 lg:w-16 h-auto" />
+      <span class="text-xl font-bold text-indigo-600 hover:underline">QA Test Management</span>
+    </a>
+    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Logout</button>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto mt-8 px-4">
+    <!-- Header + Result Button -->
+    <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+      <h2 id="projectTitle" class="text-2xl font-semibold text-gray-700">Project:</h2>
+      <div class="flex gap-3 items-center">
+        <a id="toResult" class="text-sm text-blue-600 underline hover:text-blue-800">
+          📊 Lihat Hasil Pengujian Project Ini
+        </a>
+        <button onclick="openAddModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          ➕ Tambah Test Case
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="mb-4 flex gap-4 flex-wrap">
+      <input type="text" id="searchInput" placeholder="🔍 Cari test case..." class="px-3 py-2 border rounded w-full md:w-1/3" />
+      <select id="labelFilter" onchange="renderTable()" class="px-3 py-2 border rounded">
+        <option value="">-- Semua Label --</option>
+        <option value="Smoke">Smoke</option>
+        <option value="Regression">Regression</option>
+        <option value="Functional">Functional</option>
+      </select>
+      <select id="statusFilter" onchange="renderTable()" class="px-3 py-2 border rounded">
+        <option value="">-- Semua Status --</option>
+        <option value="Not Started">Not Started</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Passed">Passed</option>
+        <option value="Failed">Failed</option>
+        <option value="Blocked">Blocked</option>
+        <option value="Retested">Retested</option>
+      </select>
+      <!-- Filter berdasarkan Requirement -->
+      <select id="reqFilter" onchange="renderTable()" class="px-3 py-2 border rounded">
+        <option value="">-- Semua Requirement --</option>
+      </select>
+
+      
+      
+    </div>
+
+    <!-- Export & Table -->
+    <div class="overflow-x-auto bg-white shadow rounded p-4">
+      <div class="flex gap-2 mb-4">
+        <button onclick="exportCSV()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">📤 Export CSV</button>
+        <button onclick="exportXLSX()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">📊 Export XLSX</button>
+        <button onclick="exportPDF()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">📄 Export PDF</button>
+      </div>
+
+      <table class="min-w-full table-auto text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-2 border">ID</th>
+            <th class="p-2 border">Scenario</th>
+            <th class="p-2 border">Feature</th>
+            <th class="p-2 border">Steps</th>
+            <th class="p-2 border">Expected</th>
+            <th class="p-2 border">Label</th>
+            <th class="p-2 border">Execution</th>
+            <th class="p-2 border">Notes</th>
+            <th class="p-2 border">Schedule</th>
+            <th class="p-2 border">Executed At</th>
+            <th class="p-2 border">Log</th>
+            <th class="p-2 border">Attachment</th>
+            <th class="p-2 border">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="testCaseTable"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="testCaseModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
+    <div class="bg-white w-full max-w-xl p-6 rounded shadow-lg relative">
+      <h2 class="text-lg font-bold mb-4" id="modalTitle">Tambah Test Case</h2>
+
+      <div class="flex justify-between mb-4">
+        <button id="navLeft" onclick="navigateTestCase(-1)" class="text-sm text-gray-500 hover:text-black hidden">⬅ Sebelumnya</button>
+        <button id="navRight" onclick="navigateTestCase(1)" class="text-sm text-gray-500 hover:text-black hidden">Berikutnya ➡</button>
+      </div>
+
+      <input id="tcScenario" class="w-full border px-3 py-2 rounded mb-2" placeholder="Scenario" />
+      <input id="tcFeature" class="w-full border px-3 py-2 rounded mb-2" placeholder="Feature" />
+      <textarea id="tcSteps" class="w-full border px-3 py-2 rounded mb-2" placeholder="Steps (Gherkin/Plain)"></textarea>
+      <input id="tcExpected" class="w-full border px-3 py-2 rounded mb-2" placeholder="Expected Result" />
+      <select id="tcRequirement" class="w-full border px-3 py-2 rounded mb-2">
+        <option value="">-- Pilih Requirement --</option>
+      </select>      
+      <select id="tcLabel" class="w-full border px-3 py-2 rounded mb-2">
+        <option value="Functional">Functional</option>
+        <option value="Smoke">Smoke</option>
+        <option value="Regression">Regression</option>
+      </select>
+
+      <input id="tcSchedule" type="date" class="w-full border px-3 py-2 rounded mb-2" placeholder="Schedule" />
+      <input id="tcExecutedAt" type="datetime-local" class="w-full border px-3 py-2 rounded mb-2" placeholder="Executed At" />
+      <input id="tcLog" class="w-full border px-3 py-2 rounded mb-2" placeholder="Log (catatan eksekusi)" />
+      <input id="tcAttachment" class="w-full border px-3 py-2 rounded mb-2" placeholder="Attachment (link atau nama file)" />
+
+
+      <div class="flex justify-end gap-2 mt-4">
+        <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Batal</button>
+        <button id="saveBtn" onclick="saveTestCase()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="./assets/js/auth.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="./assets/js/testcase.js"></script>
+
+</body>
+
+
+</html>

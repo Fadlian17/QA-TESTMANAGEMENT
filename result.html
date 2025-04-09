@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Laporan Hasil Pengujian</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen" onload="checkLogin(); loadProjects();">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-10">
+    <a href="dashboard.html" class="flex items-center gap-2">
+      <img src="assets/img/logo.svg" alt="Logo" class="h-6 w-6">
+      <span class="text-xl font-bold text-indigo-600 hover:underline">QA Test Management</span>
+    </a>    
+    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded">Logout</button>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="max-w-5xl mx-auto mt-8 px-4">
+    <!-- Filter -->
+    <div class="flex gap-4 mb-4">
+      <label class="font-semibold">📂 Pilih Project:</label>
+      <select id="projectSelect" class="border px-3 py-2 rounded" onchange="loadResultChart()">
+        <option value="">-- Pilih Project --</option>
+      </select>
+    </div>
+
+    <!-- Chart Box -->
+    <div class="bg-white p-6 rounded shadow-md">
+      <h2 class="text-lg font-semibold mb-4">📊 Status Eksekusi Test Case</h2>
+      <div class="relative w-full max-w-2xl mx-auto">
+        <canvas id="statusChart"></canvas>
+        <canvas id="executionTimeline" class="w-full max-w-4xl mx-auto my-8"></canvas>
+        <div class="flex gap-2 mt-4">
+          <button onclick="exportChartImage()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">🖼 Export PNG</button>
+          <button onclick="exportChartPDF()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">📄 Export PDF</button>
+        </div>        
+      </div>
+    </div>
+
+    <!-- AI Suggestions -->
+  <div id="aiSuggestions" class="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded mb-6">
+    <h3 class="font-semibold text-lg mb-2">🤖 AI Suggestions</h3>
+    <ul class="list-disc list-inside space-y-1 text-sm" id="aiSuggestionsList">
+      <li>Memuat analisa...</li>
+    </ul>
+  </div>
+
+
+      <!-- AI Summary -->
+    <div id="aiSummary" class="bg-indigo-50 border-l-4 border-indigo-400 text-indigo-800 p-4 rounded mb-6">
+      <h3 class="font-semibold text-lg mb-2">📝 AI Summary</h3>
+      <p id="aiSummaryText" class="text-sm italic text-gray-700">Memuat narasi laporan...</p>
+    </div>
+
+    <section class="bg-white rounded shadow p-4 mt-6">
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">⚙️ Setup Proyek</h3>
+      <div id="setupProjectInfo" class="text-sm text-gray-700 space-y-2"></div>
+    </section>
+    
+    
+<!-- Next Feature
+    <button onclick="sendTestReport()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 mt-6">
+      📬 Kirim Laporan via Webhook (Slack/Email)
+    </button> -->
+    
+  </main>
+
+  
+
+  <script src="./assets/js/auth.js"></script>
+  <script src="./assets/js/result.js"></script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+let editIndex = null;
+const project = new URLSearchParams(window.location.search).get("name") || "default";
+
+
+// ✅ Validasi login
+function checkLogin() {
+  const user = localStorage.getItem("loggedInUser");
+  console.log("🔒 Logged in user:", user);
+  if (!user || user === "null" || user.trim() === "") {
+    alert("Silakan login terlebih dahulu.");
+    window.location.href = "index.html";
+  }
+}
+
+function logout() {
+  localStorage.removeItem("loggedInUser");
+  window.location.href = "index.html";
+}
+
+function getIssues() {
+  return JSON.parse(localStorage.getItem(`issues_${project}`)) || [];
+}
+
+function saveIssues(data) {
+  localStorage.setItem(`issues_${project}`, JSON.stringify(data));
+}
+
+function loadIssues() {
+  const list = document.getElementById("issueList");
+  const issues = getIssues();
+  const statusFilter = document.getElementById("filterStatus")?.value || "";
+  const severityFilter = document.getElementById("filterSeverity")?.value || "";
+
+  list.innerHTML = "";
+
+  const filtered = issues.filter(issue =>
+    (!statusFilter || issue.status === statusFilter) &&
+    (!severityFilter || issue.severity === severityFilter)
+  );
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<p class="text-gray-500">Tidak ada issue yang cocok.</p>`;
+    return;
+  }
+
+  filtered.forEach((issue, i) => {
+    const div = document.createElement("div");
+    div.className = "bg-white p-4 rounded shadow";
+    div.innerHTML = `
+      <div class="flex justify-between items-start">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800">${issue.title}</h3>
+          <p class="text-sm text-gray-600 mt-1">${issue.desc}</p>
+          <p class="mt-2 text-sm">
+            Severity: <span class="font-semibold">${issue.severity}</span> |
+            Status: <span class="font-semibold">${issue.status}</span>
+          </p>
+          ${issue.linkedTestCase ? `<p class="text-sm text-blue-600 mt-1">🔗 Test Case: <a href="project.html?name=${project}#${issue.linkedTestCase}" class="underline">${issue.linkedTestCase}</a></p>` : ""}
+          ${issue.attachment ? `<p class="mt-2"><img src="${issue.attachment}" class="max-h-32 border rounded"></p>` : ""}
+        </div>
+        <div class="flex gap-2 mt-2">
+          <button onclick="editIssue(${i})" class="text-blue-600 text-sm hover:underline">Edit</button>
+          <button onclick="deleteIssue(${i})" class="text-red-600 text-sm hover:underline">Hapus</button>
+        </div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function openAddModal() {
+  editIndex = null;
+  const draft = JSON.parse(localStorage.getItem("issueDraft")) || {};
+
+  if (draft.fromProject && draft.fromProject !== project) {
+    alert(`Issue ini berasal dari project: ${draft.fromProject}`);
+  }
+
+  document.getElementById("modalTitle").textContent = "Tambah Issue";
+  document.getElementById("issueTitle").value = draft.title || "";
+  document.getElementById("issueDesc").value = draft.desc || "";
+  document.getElementById("issueSeverity").value = draft.severity || "Low";
+  document.getElementById("issueStatus").value = draft.status || "Open";
+  document.getElementById("linkedTestCase").value = draft.linkedTestCase || "";
+
+  document.getElementById("issueFile").value = "";
+  document.getElementById("issueModal").classList.remove("hidden");
+
+  // bersihkan draft setelah digunakan
+  localStorage.removeItem("issueDraft");
+}
+
+
+function closeModal() {
+  document.getElementById("issueModal").classList.add("hidden");
+}
+
+function saveIssue() {
+  const title = document.getElementById("issueTitle").value.trim();
+  const desc = document.getElementById("issueDesc").value.trim();
+  const severity = document.getElementById("issueSeverity").value;
+  const status = document.getElementById("issueStatus").value;
+  const linkedTestCase = document.getElementById("linkedTestCase").value.trim();
+  const file = document.getElementById("issueFile").files[0];
+  const attachment = file ? URL.createObjectURL(file) : null;
+
+  if (!title || !desc) return alert("Judul dan deskripsi harus diisi!");
+
+  const issues = getIssues();
+  const newIssue = { title, desc, severity, status, linkedTestCase, attachment };
+
+  if (editIndex === null) {
+    issues.push(newIssue);
+  } else {
+    issues[editIndex] = newIssue;
+  }
+
+  saveIssues(issues);
+  closeModal();
+  loadIssues();
+}
+
+function editIssue(index) {
+  const data = getIssues()[index];
+  editIndex = index;
+  document.getElementById("modalTitle").textContent = "Edit Issue";
+  document.getElementById("issueTitle").value = data.title;
+  document.getElementById("issueDesc").value = data.desc;
+  document.getElementById("issueSeverity").value = data.severity;
+  document.getElementById("issueStatus").value = data.status;
+  document.getElementById("linkedTestCase").value = data.linkedTestCase || "";
+  document.getElementById("issueModal").classList.remove("hidden");
+}
+
+function deleteIssue(index) {
+  if (confirm("Yakin ingin menghapus issue ini?")) {
+    const issues = getIssues();
+    issues.splice(index, 1);
+    saveIssues(issues);
+    loadIssues();
+  }
+}
+
+function showIssueSummary() {
+  const issues = getIssues();
+  const total = issues.length;
+  const open = issues.filter(i => i.status === "Open").length;
+  const high = issues.filter(i => i.severity === "High" || i.severity === "Critical").length;
+
+  const div = document.getElementById("issueSummary");
+  div.innerHTML = `
+    📊 Total Issue: <strong>${total}</strong> | 
+    🟡 Open: <strong>${open}</strong> | 
+    🔥 High/Critical: <strong>${high}</strong>
+  `;
+}
+
+// ✅ Jalankan setelah semua siap
+document.addEventListener("DOMContentLoaded", () => {
+  checkLogin();
+  loadIssues();
+});
