@@ -25,6 +25,29 @@
         <a id="toResult" class="text-sm text-blue-600 underline hover:text-blue-800">
           📊 Lihat Hasil Pengujian Project Ini
         </a>
+
+        <!-- 🔘 Tombol untuk membuka modal -->
+        <button onclick="openLinterModal()" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+          🔍 Jalankan AI Linter
+        </button>
+
+          <!-- 📦 Modal Linter -->
+          <div id="linterModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+            <div class="bg-white w-full max-w-2xl p-6 rounded shadow-lg relative">
+              <h2 class="text-lg font-bold mb-4">🧠 AI Linter QA Assistant</h2>
+
+              <!-- Panel output -->
+              <div id="linterPanel" class="bg-gray-100 p-4 rounded shadow-inner max-h-80 overflow-y-auto text-sm text-gray-800">
+                <!-- Suggestion akan dimasukkan di sini -->
+              </div>
+
+              <div class="flex justify-end gap-2 mt-4">
+                <button onclick="closeLinterModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Tutup</button>
+              </div>
+            </div>
+          </div>
+
+
         <button onclick="openAddModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
           ➕ Tambah Test Case
         </button>
@@ -130,7 +153,55 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="./assets/js/testcase.js"></script>
-
+  <script src="assets/js/ai_linter.js"></script>
+  <script>
+    function openLinterModal() {
+      document.getElementById("linterModal").classList.remove("hidden");
+      runAILinter(); // jalankan linter saat modal dibuka
+    }
+    
+    function closeLinterModal() {
+      document.getElementById("linterModal").classList.add("hidden");
+    }
+    
+    function runAILinter() {
+      const projectName = new URLSearchParams(window.location.search).get("name");
+      const testCases = JSON.parse(localStorage.getItem(`testCases_${projectName}`)) || [];
+      const suggestions = [];
+    
+      testCases.forEach(tc => {
+        if (!tc.expected || tc.expected.trim().length < 5) {
+          suggestions.push(`🧪 Test Case ${tc.id} tidak memiliki expected result yang jelas.`);
+        }
+        if (tc.steps && tc.steps.split("\n").length < 2) {
+          suggestions.push(`📉 Test Case ${tc.id} hanya memiliki 1 langkah. Tambahkan langkah detail.`);
+        }
+        if (tc.steps && !tc.steps.includes("Given") && !tc.steps.includes("When")) {
+          suggestions.push(`⚠️ Test Case ${tc.id} tidak menggunakan format Gherkin.`);
+        }
+        if (tc.feature?.toLowerCase() === "login" && tc.label === "Regression") {
+          suggestions.push(`🔁 Test Case ${tc.id} untuk fitur login sudah ada. Periksa kemungkinan duplikasi.`);
+        }
+        if (!tc.requirement || tc.requirement === "-") {
+          suggestions.push(`📋 Test Case ${tc.id} belum dikaitkan dengan requirement.`);
+        }
+      });
+    
+      const panel = document.getElementById("linterPanel");
+      panel.innerHTML = "";
+    
+      if (suggestions.length === 0) {
+        panel.innerHTML = "<p class='text-green-700'>✅ Tidak ditemukan masalah pada test case.</p>";
+      } else {
+        suggestions.forEach(msg => {
+          const p = document.createElement("p");
+          p.textContent = msg;
+          panel.appendChild(p);
+        });
+      }
+    }
+    </script>
+    
 </body>
 
 
