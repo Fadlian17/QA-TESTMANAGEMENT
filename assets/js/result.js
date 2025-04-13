@@ -2,6 +2,8 @@ let chartInstance = null;
 
 let chartTimelineInstance = null;
 
+let bugChartInstance = null;
+
 
 function loadProjects() {
   const projects = JSON.parse(localStorage.getItem("projects")) || [];
@@ -261,36 +263,46 @@ function loadProjectSetup(project) {
 function renderBugDensityChart(testCases) {
   const ctx = document.getElementById("bugHeatmapChart").getContext("2d");
 
-  const bugCounts = {};
+  // Destroy previous chart if exists
+  if (bugChartInstance) {
+    bugChartInstance.destroy();
+  }
+
+  const featureCounts = {};
+
   testCases.forEach(tc => {
     if (tc.status === "Failed") {
-      bugCounts[tc.feature] = (bugCounts[tc.feature] || 0) + 1;
+      const feature = tc.feature || "Unknown";
+      featureCounts[feature] = (featureCounts[feature] || 0) + 1;
     }
   });
 
-  const features = Object.keys(bugCounts);
-  const counts = Object.values(bugCounts);
+  const labels = Object.keys(featureCounts);
+  const data = Object.values(featureCounts);
 
-  new Chart(ctx, {
-    type: 'bar',
+  bugChartInstance = new Chart(ctx, {
+    type: "bar",
     data: {
-      labels: features,
+      labels,
       datasets: [{
-        label: "Jumlah Gagal",
-        data: counts,
-        backgroundColor: 'rgba(255, 99, 132, 0.7)',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 1
+        label: "❌ Bug Count per Feature",
+        data,
+        backgroundColor: "rgba(255, 99, 132, 0.6)",
       }]
     },
     options: {
-      indexAxis: 'y',
-      scales: {
-        x: { beginAtZero: true }
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: "📊 Bug Density (Failed Test per Feature)"
+        }
       }
     }
   });
 }
+
 
 function renderOverlappingTests(testCases) {
   const container = document.getElementById("overlappingInsights");

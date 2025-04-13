@@ -5,8 +5,9 @@
   <title>Setup Proyek</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="assets/js/auth.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen p-6">
+<body class="bg-gray-100 min-h-screen p-6" onload="checkLogin(); loadSetup();">
 
   <div class="max-w-3xl mx-auto bg-white rounded shadow p-6">
     <div class="flex justify-between items-center mb-4">
@@ -14,14 +15,14 @@
       <a href="dashboard.html" class="text-sm text-indigo-600 hover:underline">⬅ Kembali ke Dashboard</a>
     </div>
 
-    <button type="button" onclick="exportSetupPDF()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 mt-4">
-        📄 Export Setup ke PDF
-      </button>      
+    <button type="button" onclick="exportSetupPDF()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 mt-4 mb-4">
+      📄 Export Setup ke PDF
+    </button>      
 
     <form id="setupForm" onsubmit="saveSetup(event)">
       <div class="mb-4">
         <label class="block text-gray-700 mb-1">📁 Nama Proyek</label>
-        <input type="text" id="projectName" class="w-full px-3 py-2 border rounded" readonly />
+        <input type="text" id="projectName" class="w-full px-3 py-2 border rounded bg-gray-100" readonly />
       </div>
 
       <div class="mb-4">
@@ -36,34 +37,41 @@
 
       <div class="mb-4">
         <label class="block text-gray-700 mb-1">🔗 Link Tambahan (opsional)</label>
-        <input type="url" id="link" class="w-full px-3 py-2 border rounded" placeholder="https://contoh.com" />
+        <input type="url" id="link" class="w-full px-3 py-2 border rounded" />
       </div>
 
       <div class="mb-4">
         <label class="block text-gray-700 mb-1">📌 Link Penting (opsional)</label>
-        <input type="url" id="importantLink" class="w-full px-3 py-2 border rounded" placeholder="https://repo.com/docs" />
+        <input type="url" id="importantLink" class="w-full px-3 py-2 border rounded" />
       </div>
 
       <div class="mb-4">
         <label class="block text-gray-700 mb-1">🖼️ Upload Gambar Setup</label>
-        <input type="file" id="imageUpload" accept="image/*" class="w-full mb-2" onchange="previewImage()" />
-        <img id="previewImage" src="" class="max-h-48 rounded border hidden" />
+        <input type="file" id="imageUpload" accept="image/*" class="w-full mb-2" />
+        <img id="previewImage" src="" class="max-h-48 rounded border hidden" alt="Preview Gambar"/>
       </div>
 
       <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
         💾 Simpan Setup
       </button>
-
     </form>
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const project = new URLSearchParams(window.location.search).get("project") || "default";
+    let project = new URLSearchParams(window.location.search).get("project") || "default";
+
+    function checkLogin() {
+      const user = localStorage.getItem("loggedInUser");
+      if (!user) {
+        alert("Silakan login terlebih dahulu.");
+        window.location.href = "index.html";
+      }
+    }
+
+    function loadSetup() {
       document.getElementById("projectName").value = project;
-  
-      // Load existing setup
       const saved = JSON.parse(localStorage.getItem(`projectSetup_${project}`)) || {};
+
       if (saved.summary) document.getElementById("summary").value = saved.summary;
       if (saved.details) document.getElementById("details").value = saved.details;
       if (saved.link) document.getElementById("link").value = saved.link;
@@ -73,8 +81,7 @@
         img.src = saved.image;
         img.classList.remove("hidden");
       }
-  
-      // Fungsi preview image
+
       document.getElementById("imageUpload").addEventListener("change", function () {
         const file = this.files[0];
         if (file) {
@@ -87,57 +94,77 @@
           reader.readAsDataURL(file);
         }
       });
-  
-      // Fungsi simpan
-      document.getElementById("setupForm").addEventListener("submit", function (e) {
-        e.preventDefault();
-        const data = {
-          summary: document.getElementById("summary").value,
-          details: document.getElementById("details").value,
-          link: document.getElementById("link").value,
-          importantLink: document.getElementById("importantLink").value,
-          image: document.getElementById("previewImage").src || null
+    }
+
+    function saveSetup(e) {
+      e.preventDefault();
+      const data = {
+        summary: document.getElementById("summary").value,
+        details: document.getElementById("details").value,
+        link: document.getElementById("link").value,
+        importantLink: document.getElementById("importantLink").value,
+        image: document.getElementById("previewImage").src || null
+      };
+      localStorage.setItem(`projectSetup_${project}`, JSON.stringify(data));
+      alert("✅ Setup proyek berhasil disimpan!");
+    }
+
+    async function exportSetupPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const projectName = document.getElementById("projectName").value || "Tanpa Nama";
+      const summary = document.getElementById("summary").value || "-";
+      const details = document.getElementById("details").value || "-";
+      const link = document.getElementById("link").value || "-";
+      const importantLink = document.getElementById("importantLink").value || "-";
+      const image = document.getElementById("previewImage").src;
+
+      let y = 15;
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(`📁 Setup Proyek: ${projectName}`, 10, y); y += 10;
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold"); doc.text("📝 Rangkuman:", 10, y); y += 6;
+      doc.setFont("helvetica", "normal");
+      doc.text(doc.splitTextToSize(summary, 180), 12, y); y += 12;
+
+      doc.setFont("helvetica", "bold"); doc.text("📄 Detail Setup:", 10, y); y += 6;
+      doc.setFont("helvetica", "normal");
+      doc.text(doc.splitTextToSize(details, 180), 12, y); y += 12;
+
+      if (link !== "-") {
+        doc.setFont("helvetica", "bold"); doc.text("🔗 Link Tambahan:", 10, y); y += 6;
+        doc.setFont("helvetica", "normal");
+        doc.text(link, 12, y); y += 6;
+      }
+
+      if (importantLink !== "-") {
+        doc.setFont("helvetica", "bold"); doc.text("📌 Link Penting:", 10, y); y += 6;
+        doc.setFont("helvetica", "normal");
+        doc.text(importantLink, 12, y); y += 6;
+      }
+
+      if (image && !image.includes("undefined")) {
+        const img = new Image();
+        img.src = image;
+        img.onload = function () {
+          const ratio = img.width / img.height;
+          const imgWidth = 120;
+          const imgHeight = imgWidth / ratio;
+          if (y + imgHeight > 280) {
+            doc.addPage(); y = 20;
+          }
+          doc.setFont("helvetica", "bold");
+          doc.text("🖼️ Preview Gambar:", 10, y); y += 5;
+          doc.addImage(image, "JPEG", 12, y, imgWidth, imgHeight);
+          doc.save(`setup_project_${projectName}.pdf`);
         };
-        localStorage.setItem(`projectSetup_${project}`, JSON.stringify(data));
-        alert("✅ Setup proyek berhasil disimpan!");
-      });
-    });
-
-    function exportSetupPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    const project = document.getElementById("projectName").value;
-    const summary = document.getElementById("summary").value;
-    const details = document.getElementById("details").value;
-    const link = document.getElementById("link").value;
-    const importantLink = document.getElementById("importantLink").value;
-
-    doc.setFontSize(14);
-    doc.text(`📁 Setup Proyek: ${project}`, 10, 15);
-
-    doc.setFontSize(11);
-    let y = 25;
-    doc.text("📝 Rangkuman:", 10, y); y += 7;
-    doc.setFont("normal"); doc.text(summary || '-', 12, y); y += 10;
-
-    doc.setFont("bold"); doc.text("📄 Detail Setup:", 10, y); y += 7;
-    doc.setFont("normal"); doc.text(details || '-', 12, y); y += 10;
-
-    if (link) {
-        doc.setFont("bold"); doc.text("🔗 Link Tambahan:", 10, y); y += 7;
-        doc.setFont("normal"); doc.text(link, 12, y); y += 7;
+      } else {
+        doc.save(`setup_project_${projectName}.pdf`);
+      }
     }
-
-    if (importantLink) {
-        doc.setFont("bold"); doc.text("📌 Link Penting:", 10, y); y += 7;
-        doc.setFont("normal"); doc.text(importantLink, 12, y); y += 7;
-    }
-
-    doc.save(`setup_project_${project}.pdf`);
-    }
-
   </script>
-  
 </body>
 </html>
