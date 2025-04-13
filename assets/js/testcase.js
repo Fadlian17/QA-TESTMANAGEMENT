@@ -68,6 +68,9 @@ function openEditModal(index) {
   const tc = getTestCases()[index];
   editIndex = index;
 
+  // ⏱️ Pastikan dropdown Requirement sudah terisi sebelum set value
+  populateRequirementOptions();
+
   document.getElementById("modalTitle").innerText = `Edit Test Case (${tc.id})`;
   document.getElementById("tcScenario").value = tc.scenario;
   document.getElementById("tcFeature").value = tc.feature;
@@ -80,12 +83,10 @@ function openEditModal(index) {
   document.getElementById("tcLog").value = tc.log || "";
   document.getElementById("tcAttachment").value = tc.attachment || "";
 
-
   document.getElementById("testCaseModal").classList.remove("hidden");
   toggleModalNavButtons();
-  populateRequirementOptions();
-
 }
+
 
 function toggleModalNavButtons() {
   const leftBtn = document.getElementById("navLeft");
@@ -337,5 +338,17 @@ function reportToIssue(index) {
 }
 
 
+function applyGherkinTemplate() {
+  const stepsField = document.getElementById("tcSteps");
+  const defaultGherkin = 
+`Feature: [Fitur yang diuji]
+  Scenario: [Judul skenario]
+    Given [kondisi awal]
+    When [aksi yang dilakukan]
+    Then [hasil yang diharapkan]`;
+
+  stepsField.value = defaultGherkin;
+  stepsField.focus();
+}
 
 

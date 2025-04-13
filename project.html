@@ -4,6 +4,21 @@
   <meta charset="UTF-8" />
   <title>Test Case - Project</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gherkin-highlight {
+      white-space: pre-wrap;
+      font-family: monospace;
+    }
+    .gherkin-keyword {
+      font-weight: bold;
+    }
+    .gherkin-keyword-given { color: #4caf50; }     /* green */
+    .gherkin-keyword-when { color: #2196f3; }      /* blue */
+    .gherkin-keyword-then { color: #ff9800; }      /* orange */
+    .gherkin-keyword-and,
+    .gherkin-keyword-but { color: #9c27b0; }       /* purple */
+  </style>
+  
 </head>
 <body class="bg-gray-100 min-h-screen" onload="checkLogin(); loadProjectPage();">
 
@@ -124,7 +139,14 @@
 
       <input id="tcScenario" class="w-full border px-3 py-2 rounded mb-2" placeholder="Scenario" />
       <input id="tcFeature" class="w-full border px-3 py-2 rounded mb-2" placeholder="Feature" />
-      <textarea id="tcSteps" class="w-full border px-3 py-2 rounded mb-2" placeholder="Steps (Gherkin/Plain)"></textarea>
+      <div class="mb-2">
+        <label for="tcSteps" class="block text-gray-700 mb-1">🧾 Langkah-langkah (Steps)</label>
+        <textarea id="tcSteps" class="w-full border px-3 py-2 rounded mb-1" placeholder="Steps (Gherkin atau format biasa)..." oninput="renderHighlightedSteps()"></textarea>
+        <div id="gherkinPreview" class="gherkin-highlight bg-gray-100 p-3 rounded text-sm mt-2 hidden"></div>
+        <button type="button" onclick="applyGherkinTemplate()" class="text-blue-600 text-sm hover:underline mt-1">
+          ➕ Gunakan Template Gherkin
+        </button>
+      </div>      
       <input id="tcExpected" class="w-full border px-3 py-2 rounded mb-2" placeholder="Expected Result" />
       <select id="tcRequirement" class="w-full border px-3 py-2 rounded mb-2">
         <option value="">-- Pilih Requirement --</option>
@@ -201,6 +223,28 @@
       }
     }
     </script>
+
+  <script>
+function renderHighlightedSteps() {
+  const textarea = document.getElementById("tcSteps");
+  const preview = document.getElementById("gherkinPreview");
+
+  const raw = textarea.value || '';
+  const lines = raw.split('\n').map(line => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("Given")) return `<span class="gherkin-keyword gherkin-keyword-given">${line.replace("Given", "<b>Given</b>")}</span>`;
+    if (trimmed.startsWith("When")) return `<span class="gherkin-keyword gherkin-keyword-when">${line.replace("When", "<b>When</b>")}</span>`;
+    if (trimmed.startsWith("Then")) return `<span class="gherkin-keyword gherkin-keyword-then">${line.replace("Then", "<b>Then</b>")}</span>`;
+    if (trimmed.startsWith("And")) return `<span class="gherkin-keyword gherkin-keyword-and">${line.replace("And", "<b>And</b>")}</span>`;
+    if (trimmed.startsWith("But")) return `<span class="gherkin-keyword gherkin-keyword-but">${line.replace("But", "<b>But</b>")}</span>`;
+    return line;
+  });
+
+  preview.innerHTML = lines.join("<br>");
+  preview.classList.toggle("hidden", raw.trim() === "");
+}
+</script>
+
     
 </body>
 
