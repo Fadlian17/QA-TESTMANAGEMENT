@@ -1,44 +1,60 @@
-# 🧪 QA Test Management System (Web-Based)
+# 🧪 QA Test Management Platform (-Web Based-)
 
-Sistem manajemen test case berbasis website yang ringan dan efisien. Dibuat untuk mendukung tim QA dalam mencatat, menjalankan, dan mengevaluasi test case secara fleksibel. **Tanpa backend, 100% client-side** — hanya butuh browser.
-
----
+Platform berbasis web untuk membantu tim QA dalam mengelola test case, requirement, issue tracking, serta pelaporan pengujian dengan visualisasi.
 
 ## 📸 Preview
 
-![preview](assets/img/preview.png) <!-- Tambahkan screenshot jika tersedia -->
-
+![preview](assets/img/preview1.png) <!-- Tambahkan screenshot jika tersedia -->
+![preview](assets/img/preview2.png) <!-- Tambahkan screenshot jika tersedia -->
+![preview](assets/img/preview3.png) <!-- Tambahkan screenshot jika tersedia -->
 ---
 
-## 🚀 Fitur Utama
+## 🌐 Fitur Utama
 
-- 🔐 Login & Register dengan **role (admin/dev)**
-- 🗃 Manajemen **project**, test case, dan scenario
-- 🏷 Test labeling (Smoke, Regression, Functional, dll)
-- ✅ Status eksekusi: Passed, Failed, Blocked, dll
-- 📥 Export:
-  - Chart ke PNG / PDF
-  - Matriks coverage ke PDF
-- 📊 Laporan visual (Chart.js)
-- 🧮 Matrix Requirement ↔ Scenario ↔ Test Case
-- 📬 Webhook siap integrasi ke **Slack / Email / Odoo**
+### ✅ Test Case Management
+- CRUD test case berbasis per project.
+- Kategori (Smoke, Regression, Functional).
+- Status eksekusi: Not Started, In Progress, Passed, Failed, Blocked, Retested.
+- Versi test case, notes & log testing.
+- Export ke CSV, XLSX, PDF.
+- Navigasi antar test case, filter, dan search.
 
----
+### 📋 Requirement Management
+- CRUD requirement dengan:
+  - ID unik + validasi
+  - Judul, deskripsi
+  - User Flow, Performance, Supported Devices, Recovery
+  - Upload Diagram (image preview)
+- Link otomatis ke test case.
+- Hitung jumlah test case per requirement.
+- Export requirement ke PDF.
 
-## 🛠 Teknologi yang Digunakan
+### 🐞 Issue Tracking
+- CRUD issue tracking per project.
+- Filter by Status (Open, Resolved, etc) & Severity (Low, High, Critical).
+- Link otomatis dari test case yang gagal (`Failed` → “Laporkan ke Issue”).
+- Upload Screenshot/file.
+- Auto-populate issue jika dari test case gagal.
+- Dashboard ringkasan: total, open, high severity, dsb.
 
-- HTML, JavaScript, Tailwind CSS
-- Chart.js (visualisasi)
-- jsPDF (export PDF)
-- LocalStorage (penyimpanan data)
-- Tanpa backend!
+### 📊 Reporting & Matriks
+- Pie/Bar chart hasil test case.
+- Execution timeline (per waktu).
+- AI Summary & AI Suggestion (analisa eksekusi).
+- Matriks coverage berbasis requirement → test case.
+- Navigasi langsung dari matriks ke test case.
+- Export PDF dari report dan matriks.
 
----
+### 🔐 Auth & Multi-Project
+- Login sederhana (localStorage).
+- Pemilihan project sebelum masuk halaman fitur.
+- Sidebar navigasi (responsive).
+- Proteksi halaman jika belum login.
+- Setup project (overview, link penting, dokumentasi gambar).
+- Export project setup ke PDF.
 
-## 📁 Struktur Folder
+## 🚀 Cara Menjalankan
 
-qa-test-management/ 
-├── index.html ← Halaman login ├── register.html ← Halaman registrasi ├── dashboard.html ← Daftar project ├── project.html ← Test case management ├── result.html ← Chart laporan ├── matrix.html ← Matriks requirement ├── assets/ │ ├── img/ │ │ └── logo.svg │ ├── js/ │ │ ├── auth.js │ │ ├── dashboard.js │ │ ├── testcase.js │ │ ├── result.js │ │ └── matrix.js
-
-# via file explorer
-open index.html
+1. **Download repo atau clone**
+   ```bash
+   git clone https://github.com/username/qa-test-management.git
