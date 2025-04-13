@@ -75,6 +75,9 @@ function loadResultChart(project = null) {
 
   loadProjectSetup(project);
 
+  renderBugDensityChart(testCases);
+  renderOverlappingTests(testCases);
+
 
 }
 
@@ -253,4 +256,97 @@ function loadProjectSetup(project) {
     ${setup.importantLink ? `<p><strong>📌 Link Penting:</strong> <a href="${setup.importantLink}" target="_blank" class="text-blue-600 underline">${setup.importantLink}</a></p>` : ""}
     ${setup.image ? `<img src="${setup.image}" class="mt-2 max-h-40 border rounded">` : ""}
   `;
+}
+
+function renderBugDensityChart(testCases) {
+  const ctx = document.getElementById("bugHeatmapChart").getContext("2d");
+
+  const bugCounts = {};
+  testCases.forEach(tc => {
+    if (tc.status === "Failed") {
+      bugCounts[tc.feature] = (bugCounts[tc.feature] || 0) + 1;
+    }
+  });
+
+  const features = Object.keys(bugCounts);
+  const counts = Object.values(bugCounts);
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: features,
+      datasets: [{
+        label: "Jumlah Gagal",
+        data: counts,
+        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+function renderOverlappingTests(testCases) {
+  const container = document.getElementById("overlappingInsights");
+  container.innerHTML = "";
+
+  const pairs = [];
+  const threshold = 0.75;
+
+  const vectorize = str => {
+    return str.toLowerCase().split(/\W+/).reduce((acc, word) => {
+      if (word) acc[word] = (acc[word] || 0) + 1;
+      return acc;
+    }, {});
+  };
+
+  const cosineSimilarity = (vecA, vecB) => {
+    const allKeys = new Set([...Object.keys(vecA), ...Object.keys(vecB)]);
+    let dot = 0, normA = 0, normB = 0;
+
+    allKeys.forEach(k => {
+      const a = vecA[k] || 0;
+      const b = vecB[k] || 0;
+      dot += a * b;
+      normA += a * a;
+      normB += b * b;
+    });
+
+    return dot / (Math.sqrt(normA) * Math.sqrt(normB) || 1);
+  };
+
+  // Bandingkan semua test case dengan lainnya
+  for (let i = 0; i < testCases.length; i++) {
+    for (let j = i + 1; j < testCases.length; j++) {
+      const sim = cosineSimilarity(
+        vectorize(testCases[i].scenario),
+        vectorize(testCases[j].scenario)
+      );
+
+      if (sim >= threshold) {
+        pairs.push({
+          a: testCases[i].id,
+          b: testCases[j].id,
+          score: Math.round(sim * 100)
+        });
+      }
+    }
+  }
+
+  if (pairs.length === 0) {
+    container.innerHTML = `<li>Tidak ada test case yang terdeteksi mirip secara signifikan.</li>`;
+    return;
+  }
+
+  pairs.forEach(pair => {
+    const li = document.createElement("li");
+    li.textContent = `🟡 ${pair.a} dan ${pair.b} memiliki kemiripan skenario ${pair.score}% - review kemungkinan redundansi.`;
+    container.appendChild(li);
+  });
 }
