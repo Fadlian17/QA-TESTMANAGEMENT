@@ -18,11 +18,16 @@
         </a>
       </div>
       <nav class="p-4 space-y-2 text-sm">
-        <a href="dashboard.html" class="nav-link block px-3 py-2 rounded hover:bg-indigo-100">📂 Project List</a>
-        <a href="requirement.html" class="nav-link block px-3 py-2 rounded hover:bg-indigo-100">📋 Requirement</a>
-        <a href="issue.html" class="nav-link block px-3 py-2 rounded hover:bg-indigo-100">🐞 Issue Tracking</a>
-        <a href="about.html" class="nav-link block px-3 py-2 rounded hover:bg-indigo-100">📘  Tentang Aplikasi</a>
-      </nav>
+        <a href="dashboard.html" class="bg-gray-100 dark:bg-gray-900 dark:text-white transition-colors duration-500 nav-link block px-3 py-2 rounded hover:bg-indigo-100">📂 Project List</a>
+        <a href="requirement.html" class="bg-gray-100 dark:bg-gray-900 dark:text-white transition-colors duration-500 nav-link block px-3 py-2 rounded hover:bg-indigo-100">📋 Requirement</a>
+        <a href="issue.html" class="bg-gray-100 dark:bg-gray-900 dark:text-white transition-colors duration-500 nav-link block px-3 py-2 rounded hover:bg-indigo-100">🐞 Issue Tracking</a>
+        <a href="api_analyzer.html" class="bg-gray-100 dark:bg-gray-900 dark:text-white transition-colors duration-500 nav-link block px-3 py-2 rounded hover:bg-indigo-100">🔍 API Analyzer</a>
+        <a href="about.html" class="bg-gray-100 dark:bg-gray-900 dark:text-white transition-colors duration-500 nav-link block px-3 py-2 rounded hover:bg-indigo-100">📘  Tentang Aplikasi</a>
+        <button onclick="toggleDarkMode()" id="darkModeToggle"
+        class="ml-4 bg-gray-800 dark:bg-gray-200 dark:text-gray-800 text-white px-3 py-1 rounded text-sm transition-colors duration-300">
+        🌙 Dark Mode
+      </button>           
+    </nav>
     </aside>
 
   <div class="max-w-5xl mx-auto py-6 px-4">
@@ -141,5 +146,40 @@
     });
   }
 </script>
+
+<script>
+  // Aktifkan Dark Mode jika sebelumnya sudah disimpan
+  document.addEventListener("DOMContentLoaded", () => {
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.classList.add("dark");
+      updateToggleIcon(true);
+    }
+  });
+
+  function toggleDarkMode() {
+    const isDark = document.documentElement.classList.toggle("dark");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+    updateToggleIcon(isDark);
+  }
+
+  function updateToggleIcon(isDark) {
+    const btn = document.getElementById("darkModeToggle");
+    if (btn) {
+      btn.innerHTML = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+    }
+  }
+</script>
+
+<script>
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar.classList.contains("hidden")) {
+    sidebar.classList.remove("hidden");
+  } else {
+    sidebar.classList.add("hidden");
+  }
+}
+</script>
+
 
 </html>
