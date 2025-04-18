@@ -50,3 +50,12 @@ function checkAccess(requiredRole) {
     window.location.href = "dashboard.html";
   }
 }
+
+
+
+function addAuditLog(project, log) {
+  const key = `auditLogs_${project}`;
+  const logs = JSON.parse(localStorage.getItem(key)) || [];
+  logs.push({ ...log, timestamp: new Date().toISOString() });
+  localStorage.setItem(key, JSON.stringify(logs));
+}

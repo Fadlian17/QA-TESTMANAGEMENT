@@ -102,6 +102,14 @@
         <button onclick="saveIssue()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Simpan</button>
       </div>
     </div>
+
+    <textarea id="commentInput" class="w-full border rounded px-3 py-2 mb-2" placeholder="Tulis komentar atau catatan perubahan..."></textarea>
+    <button onclick="submitComment()" class="bg-indigo-600 text-white px-3 py-2 rounded">💬 Kirim Komentar</button>
+
+    <ul id="commentList" class="mt-4 text-sm text-gray-700 space-y-1">
+      <!-- komentar akan di-render di sini -->
+    </ul>
+
   </div>
 
 </div>

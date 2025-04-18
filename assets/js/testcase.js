@@ -170,6 +170,15 @@ function saveTestCase() {
   saveTestCases(testCases);
   closeModal();
   renderTable();
+
+  addAuditLog(projectName, {
+    type: "testcase",
+    id: testCases[editIndex]?.id || newId,
+    action: editIndex === null ? "add" : "edit",
+    by: localStorage.getItem("loggedInUser") || "unknown",
+    note: editIndex === null ? "Menambahkan test case" : "Mengedit test case"
+  });
+  
 }
 
 function deleteTestCase(index) {
@@ -352,3 +361,31 @@ function applyGherkinTemplate() {
 }
 
 
+function submitComment() {
+  const comment = document.getElementById("commentInput").value.trim();
+  if (!comment) return;
+
+  addAuditLog(projectName, {
+    type: "testcase",
+    id: getTestCases()[editIndex]?.id || "unknown",
+    action: "comment",
+    by: localStorage.getItem("loggedInUser") || "unknown",
+    note: comment
+  });
+
+  document.getElementById("commentInput").value = "";
+  renderComments(); // refresh
+}
+
+function renderComments() {
+  const comments = JSON.parse(localStorage.getItem(`auditLogs_${projectName}`)) || [];
+  const related = comments.filter(l => l.type === "testcase" && l.id === getTestCases()[editIndex]?.id);
+  const list = document.getElementById("commentList");
+
+  list.innerHTML = "";
+  related.forEach(log => {
+    const li = document.createElement("li");
+    li.textContent = `🕒 ${new Date(log.timestamp).toLocaleString()} - ${log.by}: ${log.note}`;
+    list.appendChild(li);
+  });
+}
