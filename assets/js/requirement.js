@@ -180,3 +180,32 @@ document.addEventListener("DOMContentLoaded", () => {
     nameDisplay.textContent = `📁 Project: ${project}`;
   }
 });
+
+
+function generateContextAssistant() {
+  const data = JSON.parse(localStorage.getItem(`requirements_${project}`)) || [];
+
+  if (!data.length) {
+    document.getElementById("contextAssistantPanel").innerHTML = `<p class="text-gray-500">Tidak ada data requirement untuk dianalisis.</p>`;
+    return;
+  }
+
+  const suggestions = [];
+
+  const emptyFlow = data.filter(r => !r.flow?.trim()).length;
+  const noDiagram = data.filter(r => !r.diagram).length;
+  const perfMissing = data.filter(r => !r.performance?.trim()).length;
+  const weakRecovery = data.filter(r => r.recovery?.toLowerCase().includes("tidak tahu") || !r.recovery?.trim()).length;
+
+  if (emptyFlow > 0) suggestions.push(`📉 <strong>${emptyFlow}</strong> requirement belum memiliki user flow.`);
+  if (noDiagram > 0) suggestions.push(`🖼️ <strong>${noDiagram}</strong> requirement belum dilengkapi diagram visual.`);
+  if (perfMissing > 0) suggestions.push(`⚙️ <strong>${perfMissing}</strong> requirement belum memiliki performance requirement.`);
+  if (weakRecovery > 0) suggestions.push(`🛡️ Beberapa requirement memiliki rencana recovery yang kurang jelas.`);
+
+  if (suggestions.length === 0) {
+    suggestions.push("✅ Semua requirement sudah cukup lengkap. Tidak ada rekomendasi tambahan saat ini.");
+  }
+
+  const listHtml = `<ul class="list-disc pl-5 space-y-2">${suggestions.map(s => `<li>${s}</li>`).join("")}</ul>`;
+  document.getElementById("contextAssistantPanel").innerHTML = listHtml;
+}

@@ -160,3 +160,33 @@ document.addEventListener("DOMContentLoaded", () => {
   checkLogin();
   loadIssues();
 });
+
+
+
+function runMCPAssistant() {
+  const project = new URLSearchParams(window.location.search).get("name") || "default";
+  const testCases = JSON.parse(localStorage.getItem(`testCases_${project}`)) || [];
+
+  const failed = testCases.find(tc => tc.status === "Failed");
+
+  if (failed) {
+    document.getElementById("linkedTestCase").value = failed.id;
+    const suggestion = `
+      📛 Issue ini berkaitan dengan Test Case <strong>${failed.id}</strong> - <em>${failed.scenario}</em>.<br/>
+      📝 Saran Deskripsi: "${failed.feature} gagal saat step: ${failed.steps.substring(0, 100)}..."
+    `;
+    document.getElementById("mcpSuggestion").innerHTML = suggestion;
+    document.getElementById("mcpPanel").classList.remove("hidden");
+
+    // Auto-isi deskripsi jika kosong
+    if (!document.getElementById("issueDesc").value.trim()) {
+      document.getElementById("issueDesc").value = `${failed.feature} gagal pada step: ${failed.steps}`;
+    }
+    if (!document.getElementById("issueTitle").value.trim()) {
+      document.getElementById("issueTitle").value = `Bug pada ${failed.feature}`;
+    }
+  } else {
+    document.getElementById("mcpSuggestion").innerText = "Tidak ditemukan test case dengan status Failed untuk disarankan.";
+    document.getElementById("mcpPanel").classList.remove("hidden");
+  }
+}
