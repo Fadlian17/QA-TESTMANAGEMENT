@@ -362,3 +362,51 @@ function renderOverlappingTests(testCases) {
     container.appendChild(li);
   });
 }
+
+
+function openContextModal() {
+  document.getElementById("contextModal").classList.remove("hidden");
+}
+
+function closeContextModal() {
+  document.getElementById("contextModal").classList.add("hidden");
+}
+
+function runResultContextAnalysis() {
+  const project = document.getElementById("projectSelect").value;
+  const testCases = JSON.parse(localStorage.getItem(`testCases_${project}`)) || [];
+
+  const suggestions = [];
+  const total = testCases.length;
+  const duplicates = findDuplicateTestCases(testCases);
+  const emptySteps = testCases.filter(tc => !tc.steps || tc.steps.trim().length < 10);
+  const notStarted = testCases.filter(tc => tc.status === "Not Started");
+
+  if (duplicates.length > 0)
+    suggestions.push(`⚠️ Terdapat ${duplicates.length} test case dengan kemungkinan duplikat.`);
+  if (emptySteps.length > 0)
+    suggestions.push(`📝 ${emptySteps.length} test case memiliki langkah pengujian yang terlalu pendek atau kosong.`);
+  if (notStarted.length / total > 0.4)
+    suggestions.push(`🔁 Lebih dari 40% test case belum dimulai. Perlu prioritas eksekusi.`);
+
+  if (suggestions.length === 0)
+    suggestions.push("✅ Semua test case tampak terkelola dengan baik.");
+
+  const list = document.getElementById("contextSuggestionList");
+  list.innerHTML = "";
+  suggestions.forEach(text => {
+    const li = document.createElement("li");
+    li.textContent = text;
+    list.appendChild(li);
+  });
+}
+
+function findDuplicateTestCases(testCases) {
+  const seen = {};
+  return testCases.filter(tc => {
+    const key = `${tc.scenario}-${tc.feature}`.toLowerCase();
+    if (seen[key]) return true;
+    seen[key] = true;
+    return false;
+  });
+}
