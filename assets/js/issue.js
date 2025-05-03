@@ -4,18 +4,29 @@ const project = new URLSearchParams(window.location.search).get("name") || "defa
 
 // ✅ Validasi login
 function checkLogin() {
-  const user = localStorage.getItem("loggedInUser");
-  console.log("🔒 Logged in user:", user);
-  if (!user || user === "null" || user.trim() === "") {
+  const user = JSON.parse(localStorage.getItem("loggedUser"));
+  console.log("🔒 Logged in user:", user?.username || null);
+  if (!user) {
     alert("Silakan login terlebih dahulu.");
     window.location.href = "index.html";
   }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    checkLogin();
+    const user = JSON.parse(localStorage.getItem("loggedUser"));
+    document.getElementById("loggedUser").textContent = user?.username || "-";
+    loadIssues();
+  });
+  
 }
 
+
 function logout() {
-  localStorage.removeItem("loggedInUser");
+  localStorage.removeItem("loggedUser");
+  localStorage.removeItem("loggedIn"); // jika kamu juga pakai ini
   window.location.href = "index.html";
 }
+
 
 function getIssues() {
   return JSON.parse(localStorage.getItem(`issues_${project}`)) || [];

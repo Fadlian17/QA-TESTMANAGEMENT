@@ -32,10 +32,14 @@
       <a href="issue.html" class="bg-gray-100 dark:bg-gray-900 dark:text-white transition-colors duration-500 nav-link block px-3 py-2 rounded hover:bg-indigo-100">🐞 Issue Tracking</a>
       <a href="api_analyzer.html" class="bg-gray-100 dark:bg-gray-900 dark:text-white transition-colors duration-500 nav-link block px-3 py-2 rounded hover:bg-indigo-100">🔍 API Analyzer</a>
       <a href="about.html" class="bg-gray-100 dark:bg-gray-900 dark:text-white transition-colors duration-500 nav-link block px-3 py-2 rounded hover:bg-indigo-100">📘  Tentang Aplikasi</a>
+      <p class="text-xs text-gray-500 ml-4 mt-4">
+        🔒 Logged in user: <span id="sidebarUser">-</span>
+      </p>
+      
       <button onclick="toggleDarkMode()" id="darkModeToggle"
-      class="ml-4 bg-gray-800 dark:bg-gray-200 dark:text-gray-800 text-white px-3 py-1 rounded text-sm transition-colors duration-300">
-      🌙 Dark Mode
-    </button>     
+        class="ml-4 bg-gray-800 dark:bg-gray-200 dark:text-gray-800 text-white px-3 py-1 rounded text-sm transition-colors duration-300">
+        🌙 Dark Mode
+      </button>      
     </nav>
   </aside>
 
@@ -114,6 +118,18 @@
         btn.innerHTML = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
       }
     }
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+      const user = JSON.parse(localStorage.getItem("loggedUser"));
+      if (user && user.username) {
+        const sidebarUser = document.getElementById("sidebarUser");
+        if (sidebarUser) {
+          sidebarUser.textContent = user.username;
+        }
+      }
+    });
+
   </script>
 
 <script>

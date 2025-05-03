@@ -25,8 +25,10 @@ function login() {
   const found = users.find(u => u.username === username && u.password === password);
   if (!found) return alert("Login gagal!");
 
+  // Simpan user yang login
   localStorage.setItem("loggedIn", "true");
-  localStorage.setItem("loggedUser", JSON.stringify(found));
+  localStorage.setItem("loggedUser", JSON.stringify(found));  // <-- Key yang benar
+
   window.location.href = "dashboard.html";
 }
 
