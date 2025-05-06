@@ -1,55 +1,110 @@
-const project = new URLSearchParams(window.location.search).get("name") || "default";
+// execution.js
+
+let projectName = "";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  projectName = params.get("name");
+
+  const selector = document.getElementById("projectSelector");
+  populateProjectDropdown(selector);
+
+  if (projectName) {
+    selector.value = projectName;
+    loadTestExecutionList();
+  }
+});
+
+function populateProjectDropdown(selector) {
+  // Ambil semua key di localStorage yang berupa testCases_{project}
+  const keys = Object.keys(localStorage);
+  const projectNames = keys
+    .filter(key => key.startsWith("testCases_"))
+    .map(key => key.replace("testCases_", ""));
+
+  projectNames.forEach(name => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    selector.appendChild(option);
+  });
+}
+
+function onProjectChange() {
+  const selector = document.getElementById("projectSelector");
+  projectName = selector.value;
+
+  if (!projectName) {
+    document.getElementById("testExecutionList").innerHTML = "";
+    return;
+  }
+
+  loadTestExecutionList();
+}
+
 
 function getTestCases() {
-  return JSON.parse(localStorage.getItem(`testCases_${project}`)) || [];
+  if (!projectName) return [];
+  const data = localStorage.getItem(`testCases_${projectName}`);
+  try {
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    console.error("Gagal memuat testCases:", e);
+    return [];
+  }
 }
 
-function getExecutionResults() {
-  return JSON.parse(localStorage.getItem(`execution_${project}`)) || {};
-}
 
-function renderTestExecution() {
-  const list = document.getElementById("testExecutionList");
+function loadTestExecutionList() {
+  const container = document.getElementById("testExecutionList");
   const testCases = getTestCases();
-  const results = getExecutionResults();
 
-  list.innerHTML = "";
+  container.innerHTML = "";
 
-  testCases.forEach((tc, index) => {
-    const status = results[tc.id] || "";
-
+  testCases.forEach(tc => {
     const div = document.createElement("div");
-    div.className = "border p-4 rounded";
+    div.className = "border p-4 rounded shadow bg-gray-50";
 
     div.innerHTML = `
-      <p class="font-semibold">${tc.id}: ${tc.scenario}</p>
-      <div class="mt-2 space-x-3">
-        <label><input type="radio" name="status_${index}" value="Passed" ${status === "Passed" ? "checked" : ""}> ✅ Passed</label>
-        <label><input type="radio" name="status_${index}" value="Failed" ${status === "Failed" ? "checked" : ""}> ❌ Failed</label>
-        <label><input type="radio" name="status_${index}" value="Blocked" ${status === "Blocked" ? "checked" : ""}> 🚫 Blocked</label>
+      <div class="font-semibold text-lg mb-2">${tc.id} - ${tc.scenario}</div>
+      <div class="text-sm mb-2">Fitur: ${tc.feature}</div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium">Status:</label>
+        <select class="statusDropdown mt-1 border p-1 rounded" data-id="${tc.id}">
+          <option value="Not Started" ${tc.status === "Not Started" ? "selected" : ""}>Not Started</option>
+          <option value="In Progress" ${tc.status === "In Progress" ? "selected" : ""}>In Progress</option>
+          <option value="Passed" ${tc.status === "Passed" ? "selected" : ""}>Passed</option>
+          <option value="Failed" ${tc.status === "Failed" ? "selected" : ""}>Failed</option>
+          <option value="Blocked" ${tc.status === "Blocked" ? "selected" : ""}>Blocked</option>
+          <option value="Retested" ${tc.status === "Retested" ? "selected" : ""}>Retested</option>
+        </select>
       </div>
+      <textarea placeholder="Catatan eksekusi..." class="noteInput w-full mt-2 border p-2 rounded text-sm" data-id="${tc.id}">${tc.notes || ""}</textarea>
     `;
 
-    list.appendChild(div);
+    container.appendChild(div);
   });
 }
 
 function saveExecutionResults() {
   const testCases = getTestCases();
-  const results = {};
 
-  testCases.forEach((tc, index) => {
-    const radios = document.getElementsByName(`status_${index}`);
-    for (const r of radios) {
-      if (r.checked) {
-        results[tc.id] = r.value;
-        break;
-      }
+  document.querySelectorAll(".statusDropdown").forEach(select => {
+    const id = select.dataset.id;
+    const tc = testCases.find(t => t.id === id);
+    if (tc) {
+      tc.status = select.value;
     }
   });
 
-  localStorage.setItem(`execution_${project}`, JSON.stringify(results));
-  alert("✅ Hasil eksekusi berhasil disimpan!");
-}
+  document.querySelectorAll(".noteInput").forEach(textarea => {
+    const id = textarea.dataset.id;
+    const tc = testCases.find(t => t.id === id);
+    if (tc) {
+      tc.notes = textarea.value;
+    }
+  });
 
-document.addEventListener("DOMContentLoaded", renderTestExecution);
+  localStorage.setItem(`testCases_${projectName}`, JSON.stringify(testCases));
+  alert("Hasil eksekusi disimpan!");
+}
