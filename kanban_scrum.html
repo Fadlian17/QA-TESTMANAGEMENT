@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kanban & Scrum Boards</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 dark:text-white min-h-screen">
+  <div class="max-w-7xl mx-auto py-10 px-4">
+    <h1 class="text-3xl font-bold mb-8">🧩 Kanban & Scrum Boards</h1>
+
+    <!-- Backlog Section -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">📌 Backlog</h2>
+      <ul id="backlog" class="bg-white dark:bg-gray-800 rounded shadow p-4 space-y-2">
+        <!-- Item ditambahkan lewat JS -->
+      </ul>
+      <div class="flex mt-4 gap-2">
+        <input id="backlogInput" type="text" placeholder="Tambahkan item backlog..." class="px-3 py-2 border rounded w-full">
+        <button onclick="addBacklog()" class="bg-blue-600 text-white px-4 py-2 rounded">➕</button>
+      </div>
+    </section>
+
+    <!-- Kanban Board -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4">🗂️ Kanban Board</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <h3 class="text-lg font-bold mb-2">To Do</h3>
+          <ul id="todo" class="bg-white dark:bg-gray-800 rounded shadow p-4 space-y-2 min-h-[150px]"></ul>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold mb-2">In Progress</h3>
+          <ul id="inProgress" class="bg-white dark:bg-gray-800 rounded shadow p-4 space-y-2 min-h-[150px]"></ul>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold mb-2">Done</h3>
+          <ul id="done" class="bg-white dark:bg-gray-800 rounded shadow p-4 space-y-2 min-h-[150px]"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scrum Sprint Management -->
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">🏃 Sprint Planning</h2>
+      <ul id="sprintTasks" class="bg-white dark:bg-gray-800 rounded shadow p-4 space-y-2"></ul>
+      <div class="flex mt-4 gap-2">
+        <input id="sprintInput" type="text" placeholder="Tambahkan tugas sprint..." class="px-3 py-2 border rounded w-full">
+        <button onclick="addSprintTask()" class="bg-green-600 text-white px-4 py-2 rounded">✅</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="./assets/js/kanban_scrum.js"></script>
+</body>
+</html>
