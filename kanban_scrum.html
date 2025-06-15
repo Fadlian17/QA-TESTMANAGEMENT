@@ -5,43 +5,122 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kanban & Scrum Boards</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Menambahkan sedikit custom CSS untuk drag and drop visual feedback dan min-height -->
+  <style>
+    /* Pastikan kolom memiliki tinggi minimum agar mudah di-drop, terutama saat kosong */
+    .min-h-\[200px\] {
+      min-height: 200px;
+    }
+    /* Efek visual saat item di atas area drop */
+    .kanban-column-drop-area {
+        transition: background-color 0.2s ease-in-out;
+    }
+    /* Basic styling for kanban items */
+    .kanban-item {
+      background-color: #ffffff; /* Light background for items */
+      color: #333333; /* Dark text for light background */
+      padding: 0.75rem; /* p-3 */
+      margin-bottom: 0.5rem; /* mb-2 */
+      border-radius: 0.5rem; /* rounded-lg */
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+      cursor: grab;
+      border: 1px solid #e5e7eb; /* border border-gray-200 */
+      transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    }
+
+    .kanban-item:hover {
+      background-color: #f3f4f6; /* hover:bg-gray-100 */
+    }
+
+    .kanban-item.opacity-50 {
+      opacity: 0.5;
+    }
+
+    /* Dark mode adjustments for kanban items */
+    .dark .kanban-item {
+      background-color: #374151; /* dark:bg-gray-700 */
+      color: #ffffff; /* dark:text-white */
+      border-color: #4b5563; /* dark:border-gray-600 */
+    }
+
+    .dark .kanban-item:hover {
+      background-color: #4b5563; /* dark:hover:bg-gray-600 */
+    }
+  </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 dark:text-white min-h-screen">
   <div class="max-w-7xl mx-auto py-10 px-4">
     <h1 class="text-3xl font-bold mb-8">🧩 Kanban & Scrum Boards</h1>
 
-    <!-- Backlog Section -->
+    <!-- Project Selection Section - NEW -->
+    <section class="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <h2 class="text-2xl font-semibold mb-4">Pilih Proyek</h2>
+      <div class="flex flex-col md:flex-row gap-4 items-center">
+        <select id="projectSelect" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow">
+          <option value="">-- Pilih Proyek --</option>
+          <!-- Opsi proyek akan diisi oleh JavaScript -->
+        </select>
+        <button onclick="loadSelectedProject()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 shadow-lg">
+          Load Project
+        </button>
+      </div>
+    </section>
+
+    <!-- Elemen untuk menampilkan nama proyek yang dimuat -->
+    <p id="kanbanProjectTitle" class="text-xl font-semibold mb-6 text-indigo-700 dark:text-indigo-300">Project: (Silakan pilih proyek di atas)</p>
+
+    <!--
+      Catatan: Bagian "Backlog Section" dan "Scrum Sprint Management"
+      dengan input field dan tombol "Add" dari versi sebelumnya
+      telah dikomentari. Ini karena fokus Kanban kini adalah
+      memindahkan test case yang sudah ada dari `testcase.js`.
+      Jika Anda ingin menambahkan test case baru langsung dari halaman ini,
+      Anda perlu mengimplementasikan logika penambahan test case yang
+      terintegrasi dengan `saveTestCases()` di `testcase.js`.
+    -->
     <section class="mb-12">
-      <h2 class="text-2xl font-semibold mb-4">📌 Backlog</h2>
-      <ul id="backlog" class="bg-white dark:bg-gray-800 rounded shadow p-4 space-y-2">
-        <!-- Item ditambahkan lewat JS -->
+      <h2 class="text-2xl font-semibold mb-4">📌 Backlog (Test Case Baru / Belum Terencana)</h2>
+      <!-- min-h-[200px] untuk memastikan area drop yang cukup -->
+      <ul id="backlog" class="bg-white dark:bg-gray-800 rounded shadow p-4 space-y-2 min-h-[200px] kanban-column-drop-area">
+        <!-- Item test case akan dirender di sini oleh JS -->
       </ul>
+      <!-- Bagian input dan tombol 'Add Backlog' dikomentari -->
+      <!--
       <div class="flex mt-4 gap-2">
         <input id="backlogInput" type="text" placeholder="Tambahkan item backlog..." class="px-3 py-2 border rounded w-full">
         <button onclick="addBacklog()" class="bg-blue-600 text-white px-4 py-2 rounded">➕</button>
       </div>
+      -->
     </section>
 
     <!-- Kanban Board -->
     <section class="mb-12">
       <h2 class="text-2xl font-semibold mb-4">🗂️ Kanban Board</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <h3 class="text-lg font-bold mb-2">To Do</h3>
-          <ul id="todo" class="bg-white dark:bg-gray-800 rounded shadow p-4 space-y-2 min-h-[150px]"></ul>
+      <!-- Grid dengan 4 kolom untuk tampilan desktop yang lebih baik -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Kolom To Do -->
+        <div class="bg-white dark:bg-gray-800 rounded shadow p-4">
+          <h3 class="text-lg font-bold mb-4 text-gray-700 dark:text-gray-300">To Do</h3>
+          <!-- min-h-[200px] dan kanban-column-drop-area ditambahkan -->
+          <ul id="todo" class="space-y-2 min-h-[200px] kanban-column-drop-area"></ul>
         </div>
-        <div>
-          <h3 class="text-lg font-bold mb-2">In Progress</h3>
-          <ul id="inProgress" class="bg-white dark:bg-gray-800 rounded shadow p-4 space-y-2 min-h-[150px]"></ul>
+        <!-- Kolom In Progress -->
+        <div class="bg-white dark:bg-gray-800 rounded shadow p-4">
+          <h3 class="text-lg font-bold mb-4 text-blue-700 dark:text-blue-300">In Progress</h3>
+          <!-- min-h-[200px] dan kanban-column-drop-area ditambahkan -->
+          <ul id="inProgress" class="space-y-2 min-h-[200px] kanban-column-drop-area"></ul>
         </div>
-        <div>
-          <h3 class="text-lg font-bold mb-2">Done</h3>
-          <ul id="done" class="bg-white dark:bg-gray-800 rounded shadow p-4 space-y-2 min-h-[150px]"></ul>
+        <!-- Kolom Done -->
+        <div class="bg-white dark:bg-gray-800 rounded shadow p-4">
+          <h3 class="text-lg font-bold mb-4 text-green-700 dark:text-green-300">Done</h3>
+          <!-- min-h-[200px] dan kanban-column-drop-area ditambahkan -->
+          <ul id="done" class="space-y-2 min-h-[200px] kanban-column-drop-area"></ul>
         </div>
       </div>
     </section>
 
-    <!-- Scrum Sprint Management -->
+    <!-- Bagian 'Scrum Sprint Management' dikomentari -->
+    <!--
     <section>
       <h2 class="text-2xl font-semibold mb-4">🏃 Sprint Planning</h2>
       <ul id="sprintTasks" class="bg-white dark:bg-gray-800 rounded shadow p-4 space-y-2"></ul>
@@ -50,8 +129,11 @@
         <button onclick="addSprintTask()" class="bg-green-600 text-white px-4 py-2 rounded">✅</button>
       </div>
     </section>
+    -->
   </div>
 
+  <!-- PENTING: Memuat testcase.js terlebih dahulu karena kanban_scrum.js bergantung padanya -->
+  <script src="./assets/js/testcase.js"></script>
   <script src="./assets/js/kanban_scrum.js"></script>
 </body>
 </html>
