@@ -1,6 +1,19 @@
 let projectName = ""; // Ini akan diatur saat loadProjectPage dipanggil
 let editIndex = null;
 
+// Fungsi untuk mendapatkan nama proyek aktif dari URL atau localStorage
+// Fungsi ini dibuat global secara eksplisit untuk memastikan dapat diakses dari kanban_scrum.js
+window.getActiveProject = function () {
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.get("name") ||
+    localStorage.getItem("lastProject") ||
+    sessionStorage.getItem("lastSelectedKanbanProject")
+  );
+};
+
+
+
 // Fungsi untuk mendapatkan data test cases. Sekarang menerima 'name' sebagai parameter opsional.
 // Fungsi ini dibuat global secara eksplisit untuk memastikan dapat diakses dari kanban_scrum.js
 window.getTestCases = function(name = projectName) { 
@@ -67,17 +80,20 @@ window.displayMessageBox = function(message) {
 // Fungsi yang memuat halaman proyek berdasarkan parameter URL
 function loadProjectPage() {
   const params = new URLSearchParams(window.location.search);
-  projectName = params.get("name"); // Mengatur projectName global di sini
+  projectName = params.getActiveProject(); // Menggunakan fungsi global getActiveProject
+  localStorage.setItem("lastProject", projectName);
+
   console.log("Project:", projectName);
 
   if (!projectName) {
-    // Hindari modal/alert jika project tidak ditemukan, langsung redirect
     displayMessageBox("Project tidak ditemukan.");
     setTimeout(() => {
-        window.location.href = "dashboard.html";
+      window.location.href = "dashboard.html";
     }, 1500);
     return;
   }
+
+  localStorage.setItem("lastProject", projectName); // ✅ simpan sebagai fallback
 
   document.getElementById("projectTitle").textContent = `Project: ${projectName}`;
 
@@ -89,6 +105,21 @@ function loadProjectPage() {
   renderTable();
   populateRequirementFilter();
 }
+
+// Fungsi untuk memuat proyek yang dipilih dari dropdown
+// Fungsi ini akan dipanggil saat tombol "Pilih Proyek" ditekan
+function loadSelectedProject() {
+  const selected = document.getElementById("projectSelector").value;
+
+  if (!selected) {
+    displayMessageBox("Silakan pilih proyek terlebih dahulu.");
+    return;
+  }
+
+  localStorage.setItem("lastProject", selected); // Simpan untuk fallback
+  window.location.href = `testcase.html?name=${encodeURIComponent(selected)}`; // Ganti URL sesuai file
+}
+
 
 
 function openAddModal() {
@@ -515,3 +546,18 @@ document.addEventListener("DOMContentLoaded", () => {
   checkLogin(); // Panggil fungsi validasi login
   loadProjectPage(); // Memuat proyek dan merender tabel test case
 });
+
+
+function redirectToProject() {
+  const select = document.getElementById("projectSelector");
+  const selected = select.value;
+
+  if (!selected) {
+    displayMessageBox("Silakan pilih proyek terlebih dahulu.");
+    return;
+  }
+
+  // Simpan project terakhir agar bisa fallback nanti
+  localStorage.setItem("lastProject", selected);
+  window.location.href = `kanban.html?name=${encodeURIComponent(selected)}`;
+}

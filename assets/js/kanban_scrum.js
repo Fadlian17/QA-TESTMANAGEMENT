@@ -2,7 +2,20 @@
 
 // Asumsi: Fungsi-fungsi dari testcase.js (window.getTestCases, window.saveTestCases, window.addAuditLog)
 // sudah tersedia secara global.
-// Diasumsikan juga window.checkLogin dan window.displayMessageBox tersedia global.
+// Diasumsikan uga window.checkLogin dan window.displayMessageBox tersedia global.
+
+
+// Fungsi untuk mendapatkan nama proyek aktif dari URL atau localStorage/sessionStorage
+// Ini akan digunakan untuk menentukan proyek mana yang sedang aktif
+window.getActiveProject = function () {
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.get("name") ||
+    localStorage.getItem("lastProject") ||
+    sessionStorage.getItem("lastSelectedKanbanProject")
+  );
+};
+
 
 let currentProjectName = ""; // Variabel untuk menyimpan nama proyek aktif
 
@@ -192,21 +205,23 @@ function setupDragAndDrop() {
 }
 
 // Fungsi yang dipanggil saat tombol "Load Project" diklik
-window.loadSelectedProject = function() { // Dijadikan global agar bisa diakses dari HTML
+window.loadSelectedProject = function () {
   const selectElement = document.getElementById("projectSelect");
   const selectedProject = selectElement.value;
 
   if (selectedProject) {
     currentProjectName = selectedProject;
-    sessionStorage.setItem('lastSelectedKanbanProject', selectedProject); 
-    renderKanbanBoard();
-    setupDragAndDrop(); 
+    localStorage.setItem("lastProject", selectedProject);
+    sessionStorage.setItem("lastSelectedKanbanProject", selectedProject);
+    // Redirect jika kamu ingin kembali ke halaman proyek
+    window.location.href = `project.html?name=${encodeURIComponent(selectedProject)}`;
   } else {
     displayMessageBox("Mohon pilih proyek terlebih dahulu.");
-    currentProjectName = ""; 
-    renderKanbanBoard(); // Clear board
+    currentProjectName = "";
+    renderKanbanBoard();
   }
 };
+
 
 // Handler saat DOM telah dimuat
 document.addEventListener("DOMContentLoaded", () => {
@@ -214,12 +229,9 @@ document.addEventListener("DOMContentLoaded", () => {
   populateProjectDropdown(); 
 
   // Logic untuk menentukan proyek yang akan dimuat saat pertama kali halaman dibuka
-  const params = new URLSearchParams(window.location.search);
-  const projectFromURL = params.get("name");
+  const projectToLoad = getActiveProject();
   const lastSelectedFromSession = sessionStorage.getItem('lastSelectedKanbanProject');
   const projectsAvailable = getProjects(); // Ambil daftar proyek yang tersedia
-
-  let projectToLoad = null;
 
   // Prioritas 1: Proyek dari URL
   if (projectFromURL && projectsAvailable.includes(projectFromURL)) { // Cek jika nama proyek string ada di array string

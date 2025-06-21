@@ -8,6 +8,7 @@ Platform berbasis web untuk membantu tim QA dalam mengelola test case, requireme
 ![preview](assets/img/preview2.png) <!-- Tambahkan screenshot jika tersedia -->
 ![preview](assets/img/preview3.png) <!-- Tambahkan screenshot jika tersedia -->
 ![preview](assets/img/preview4.png) <!-- Tambahkan screenshot jika tersedia -->
+![preview](assets/img/preview5.png) <!-- Tambahkan screenshot jika tersedia -->
 ---
 
 ## 🌐 Fitur Utama
