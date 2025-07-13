@@ -201,3 +201,63 @@ function runMCPAssistant() {
     document.getElementById("mcpPanel").classList.remove("hidden");
   }
 }
+
+function submitComment() {
+  const comment = document.getElementById("commentInput").value.trim();
+  if (!comment) return;
+
+  // Mendapatkan project dari URL, ini sudah ada di bagian atas issue.js
+  // const project = new URLSearchParams(window.location.search).get("name") || "default";
+
+  addAuditLog(project, { // Menggunakan variabel 'project' yang sudah ada di issue.js
+    type: "issue_comment", // Tipe log baru untuk komentar isu
+    id: "unknown_issue_id", // Perlu perbaiki ini agar ID isu saat ini
+    action: "comment",
+    by: localStorage.getItem("loggedUser")?.username || "unknown",
+    note: comment
+  });
+
+  document.getElementById("commentInput").value = "";
+  renderComments(); // Refresh daftar komentar
+}
+
+function renderComments() {
+  // Mendapatkan project dari URL, ini sudah ada di bagian atas issue.js
+  // const project = new URLSearchParams(window.location.search).get("name") || "default";
+
+  // Perlu mekanisme untuk mendapatkan ID Issue yang sedang aktif jika komentar per issue.
+  // Untuk saat ini, kita bisa merender semua komentar terkait proyek atau perluas data log.
+  const comments = JSON.parse(localStorage.getItem(`auditLogs_${project}`)) || []; // Menggunakan variabel 'project'
+
+  // Filter komentar yang hanya relevan dengan isu saat ini (jika Anda melacak isu ID di log)
+  // Atau jika ini adalah komentar umum untuk proyek/halaman isu:
+  const relatedComments = comments.filter(l => l.type === "issue_comment"); // Filter berdasarkan tipe baru
+
+  const list = document.getElementById("commentList");
+  list.innerHTML = ""; // Bersihkan daftar lama
+
+  if (relatedComments.length === 0) {
+    list.innerHTML = `<li class="text-gray-500">Belum ada komentar.</li>`;
+    return;
+  }
+
+  relatedComments.forEach(log => {
+    const li = document.createElement("li");
+    li.className = "p-2 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600";
+    li.innerHTML = `
+      <p>🕒 ${new Date(log.timestamp).toLocaleString()} - <strong>${log.by}</strong>:</p>
+      <p>${log.note}</p>
+    `;
+    list.appendChild(li);
+  });
+}
+
+// Panggil renderComments saat halaman dimuat atau setiap kali isu dimuat/diubah
+document.addEventListener("DOMContentLoaded", () => {
+    // Pastikan ini dipanggil SETELAH 'project' variabel di issue.js terisi
+    // atau panggil renderComments() di dalam loadIssues() setelah memuat data isu
+    renderComments();
+});
+
+
+
