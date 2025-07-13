@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Data Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS (xlsx) for Excel export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    /* Custom styles for better UI/UX */
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .input-field {
+      @apply px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500;
+    }
+    .btn-primary {
+      @apply bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 shadow-md;
+    }
+    .btn-secondary {
+      @apply bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-200 shadow-md dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500;
+    }
+    .btn-danger {
+      @apply bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors duration-200 shadow-md;
+    }
+    .table-header th {
+      @apply px-4 py-2 bg-gray-200 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider;
+    }
+    .table-row td {
+      @apply px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-200;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 dark:text-white min-h-screen p-4">
+  <div class="max-w-7xl mx-auto py-10 px-4">
+    <h1 class="text-3xl font-bold mb-8">🛠️ Test Data Generator</h1>
+
+    <!-- Project Selection Section -->
+    <section class="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <h2 class="text-2xl font-semibold mb-4">Pilih Proyek</h2>
+      <div class="flex flex-col md:flex-row gap-4 items-center">
+        <select id="projectSelect" class="input-field flex-grow">
+          <option value="">-- Pilih Proyek --</option>
+          <!-- Opsi proyek akan diisi oleh JavaScript -->
+        </select>
+        <button onclick="loadSelectedProject()" class="btn-primary">
+          Muat Proyek
+        </button>
+      </div>
+      <p id="dataGenProjectTitle" class="text-xl font-semibold mt-4 text-indigo-700 dark:text-indigo-300">Proyek Aktif: (Silakan pilih proyek di atas)</p>
+    </section>
+
+    <!-- Data Definition Section -->
+    <section class="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <h2 class="text-2xl font-semibold mb-4">Definisi Data</h2>
+      <div class="mb-4">
+        <label for="numRecords" class="block font-medium text-sm text-gray-700 dark:text-gray-300 mb-1">Jumlah Record:</label>
+        <input type="number" id="numRecords" value="10" min="1" class="input-field w-full">
+      </div>
+
+      <div id="fieldDefinitions" class="space-y-4 mb-4">
+        <!-- Field definition rows will be added here -->
+      </div>
+      <button onclick="addField()" class="btn-secondary">
+        ➕ Tambah Field
+      </button>
+    </section>
+
+    <!-- Generation & Download Section -->
+    <section class="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <h2 class="text-2xl font-semibold mb-4">Generator & Unduh</h2>
+      <div class="flex flex-wrap gap-4 mb-6">
+        <button onclick="generateData()" class="btn-primary">
+          🚀 Buat Data
+        </button>
+        <button onclick="downloadCSV()" class="btn-primary" id="downloadCsvBtn" disabled>
+          ⬇️ Unduh CSV
+        </button>
+        <button onclick="downloadExcel()" class="btn-primary" id="downloadExcelBtn" disabled>
+          ⬇️ Unduh Excel
+        </button>
+      </div>
+
+      <h3 class="text-xl font-semibold mb-4">Pratinjau Data</h3>
+      <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead id="previewTableHeader">
+            <!-- Table headers will be generated here -->
+          </thead>
+          <tbody id="previewTableBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <!-- Table rows will be generated here -->
+          </tbody>
+        </table>
+      </div>
+      <p id="previewMessage" class="text-gray-500 dark:text-gray-400 mt-4 text-center">Data yang dibuat akan muncul di sini.</p>
+    </section>
+  </div>
+
+  <!-- Custom Message Box -->
+  <div id="customMessageBox" class="hidden"></div>
+  <div id="customConfirmBox" class="hidden"></div>
+
+  <!-- PENTING: Memuat testcase.js terlebih dahulu karena test_data_generator.js bergantung padanya -->
+  <script src="./assets/js/testcase.js"></script>
+  <script src="./assets/js/test_data_generator.js"></script>
+</body>
+</html>
