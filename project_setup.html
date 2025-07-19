@@ -61,7 +61,7 @@
     let project = new URLSearchParams(window.location.search).get("project") || "default";
 
     function checkLogin() {
-      const user = localStorage.getItem("loggedInUser");
+      const user = localStorage.getItem("loggedUser") || localStorage.getItem("loggedInUser");
       if (!user) {
         alert("Silakan login terlebih dahulu.");
         window.location.href = "index.html";

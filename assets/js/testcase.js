@@ -79,8 +79,9 @@ window.displayMessageBox = function(message) {
 
 // Fungsi yang memuat halaman proyek berdasarkan parameter URL
 function loadProjectPage() {
-  const params = new URLSearchParams(window.location.search);
-  projectName = params.getActiveProject(); // Menggunakan fungsi global getActiveProject
+  // const params = new URLSearchParams(window.location.search);
+  // projectName = params.getActiveProject(); // Menggunakan fungsi global getActiveProject
+  projectName = window.getActiveProject(); // Perbaikan: gunakan fungsi global
   localStorage.setItem("lastProject", projectName);
 
   console.log("Project:", projectName);
@@ -95,7 +96,10 @@ function loadProjectPage() {
 
   localStorage.setItem("lastProject", projectName); // ✅ simpan sebagai fallback
 
-  document.getElementById("projectTitle").textContent = `Project: ${projectName}`;
+  const projectTitleElem = document.getElementById("projectTitle");
+  if (projectTitleElem) {
+    projectTitleElem.textContent = `Project: ${projectName}`;
+  }
 
   const resultBtn = document.getElementById("toResult");
   if (resultBtn && projectName) {
@@ -314,6 +318,7 @@ function deleteTestCase(index) {
 function renderTable() {
   const testCases = getTestCases(); // Panggil tanpa argumen
   const table = document.getElementById("testCaseTable");
+  if (!table) return; // Stop jika elemen tidak ada
   const searchKeyword = document.getElementById("searchInput")?.value?.toLowerCase() || "";
   const selectedLabel = document.getElementById("labelFilter")?.value || "";
   const selectedStatus = document.getElementById("statusFilter")?.value || "";

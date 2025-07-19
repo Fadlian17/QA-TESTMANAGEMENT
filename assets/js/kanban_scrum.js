@@ -5,12 +5,31 @@
 // Diasumsikan uga window.checkLogin dan window.displayMessageBox tersedia global.
 
 
+// Fungsi untuk mendapatkan daftar nama proyek dari localStorage yang memiliki setup (projectSetup_*)
+function getAllSetupProjects() {
+  const projectsSet = new Set();
+  // Cari dari projectSetup_*
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('projectSetup_')) {
+      const projectName = key.substring('projectSetup_'.length);
+      projectsSet.add(projectName);
+    }
+    // Tambahkan juga dari testCases_*
+    if (key.startsWith('testCases_')) {
+      const projectName = key.substring('testCases_'.length);
+      projectsSet.add(projectName);
+    }
+  }
+  return Array.from(projectsSet);
+}
+
 // Fungsi untuk mendapatkan nama proyek aktif dari URL atau localStorage/sessionStorage
-// Ini akan digunakan untuk menentukan proyek mana yang sedang aktif
+// Sekarang konsisten menggunakan parameter 'project' di URL
 window.getActiveProject = function () {
   const params = new URLSearchParams(window.location.search);
   return (
-    params.get("name") ||
+    params.get("project") ||
     localStorage.getItem("lastProject") ||
     sessionStorage.getItem("lastSelectedKanbanProject")
   );
@@ -42,50 +61,37 @@ function getProjects() {
 // Fungsi untuk mengisi dropdown pilihan proyek
 function populateProjectDropdown() {
   const selectElement = document.getElementById("projectSelect");
-  const projects = getProjects(); // Ini akan mengembalikan array string
+  const projects = getAllSetupProjects(); // Ambil dari localStorage projectSetup_* dan testCases_*
 
-  selectElement.innerHTML = '<option value="">-- Pilih Proyek --</option>'; // Reset dropdown
+  selectElement.innerHTML = '<option value="">-- Pilih Proyek --</option>';
 
-  projects.forEach(projectNameStr => { // Iterasi array string
+  projects.forEach(projectNameStr => {
     const option = document.createElement("option");
-    option.value = projectNameStr; // Nilai opsi adalah string nama proyek
-    option.textContent = projectNameStr; // Teks opsi juga string nama proyek
+    option.value = projectNameStr;
+    option.textContent = projectNameStr;
     selectElement.appendChild(option);
   });
-
-  // Logic pemuatan proyek terakhir dipindahkan ke DOMContentLoaded
 }
 
 
 // Fungsi untuk membuat elemen daftar (list item) untuk Kanban
 function createKanbanItem(testCase) {
   const li = document.createElement("li");
-  li.id = `tc-kanban-${testCase.id}`; 
-  li.className = "kanban-item"; 
-  li.textContent = `${testCase.id}: ${testCase.scenario}`;
-  
-  const featureSpan = document.createElement("span");
-  featureSpan.className = "block text-sm text-gray-500 dark:text-gray-400 mt-1";
-  featureSpan.textContent = `Feature: ${testCase.feature}`;
-  li.appendChild(featureSpan);
-
+  li.id = `tc-kanban-${testCase.id}`;
+  li.className = "kanban-item";
+  // Tampilkan ID, scenario, feature, dan status
+  li.innerHTML = `<div class="font-bold">${testCase.id}: ${testCase.scenario}</div>
+    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Feature: ${testCase.feature}</div>
+    <span class="ml-0 mt-1 px-2 py-1 rounded-full text-xs font-semibold ${getKanbanStatusColorClass(testCase.status)}">${testCase.status}</span>`;
   li.draggable = true;
-
   li.ondragstart = (e) => {
-    e.dataTransfer.setData("text/plain", testCase.id); 
+    e.dataTransfer.setData("text/plain", testCase.id);
     e.dataTransfer.effectAllowed = "move";
-    li.classList.add("opacity-50"); 
+    li.classList.add("opacity-50");
   };
-
   li.ondragend = (e) => {
-    li.classList.remove("opacity-50"); 
+    li.classList.remove("opacity-50");
   };
-
-  const statusBadge = document.createElement("span");
-  statusBadge.textContent = testCase.status;
-  statusBadge.className = `ml-2 px-2 py-1 rounded-full text-xs font-semibold ${getKanbanStatusColorClass(testCase.status)}`;
-  li.appendChild(statusBadge);
-
   return li;
 }
 
@@ -112,6 +118,8 @@ function renderKanbanBoard() {
     document.getElementById("todo").innerHTML = "";
     document.getElementById("inProgress").innerHTML = "";
     document.getElementById("done").innerHTML = "";
+    // Reset badge count
+    updateKanbanColumnCounts({});
     return; // Berhenti jika tidak ada proyek yang dipilih
   }
 
@@ -124,28 +132,62 @@ function renderKanbanBoard() {
   document.getElementById("done").innerHTML = "";
 
   // Dapatkan semua test case untuk proyek saat ini
-  // Panggil getTestCases dengan currentProjectName sebagai argumen
-  const testCases = getTestCases(currentProjectName); 
+  const testCases = getTestCases(currentProjectName);
 
-  testCases.forEach((tc) => {
+  // Hitung jumlah per kolom
+  const kanbanCounts = {
+    Backlog: 0,
+    "To Do": 0,
+    "In Progress": 0,
+    Done: 0
+  };
+
+  testCases.forEach((tc, idx) => {
     // Inisialisasi kanbanStatus jika belum ada (misal: saat test case baru dibuat)
     if (!tc.kanbanStatus) {
       tc.kanbanStatus = "Backlog"; // Default ke Backlog
-      // Penting: Simpan perubahan ini kembali ke localStorage
-      saveTestCases(testCases, currentProjectName); 
+      // Simpan perubahan ini kembali ke localStorage
+      saveTestCases(testCases, currentProjectName);
     }
-
+    // Hitung jumlah per kolom
+    if (kanbanCounts[tc.kanbanStatus] !== undefined) {
+      kanbanCounts[tc.kanbanStatus]++;
+    }
     const item = createKanbanItem(tc);
     // Menggunakan toLowerCase().replace(/\s/g, '') untuk mencocokkan ID kolom
-    const targetColumn = document.getElementById(tc.kanbanStatus.toLowerCase().replace(/\s/g, '')); 
-
+    const targetColumn = document.getElementById(tc.kanbanStatus.toLowerCase().replace(/\s/g, ''));
     if (targetColumn) {
       targetColumn.appendChild(item);
     } else {
-      console.warn(`Kolom Kanban tidak ditemukan untuk status: ${tc.kanbanStatus}. Menggunakan Backlog sebagai fallback.`);
       document.getElementById("backlog").appendChild(item); // Fallback ke backlog
+      kanbanCounts.Backlog++;
     }
   });
+  updateKanbanColumnCounts(kanbanCounts);
+}
+
+// Fungsi untuk update badge jumlah test case di header kolom
+function updateKanbanColumnCounts(counts) {
+  // Backlog
+  let backlogHeader = document.querySelector('section h2');
+  if (backlogHeader) {
+    backlogHeader.innerHTML = `📌 Backlog (Test Case Baru / Belum Terencana) <span class="inline-block bg-gray-300 text-gray-800 text-xs font-bold px-2 py-1 rounded ml-2 align-middle">${counts.Backlog || 0}</span>`;
+  }
+  // To Do
+  let todoHeader = document.querySelector('div > h3.text-lg.font-bold.mb-4.text-gray-700');
+  if (todoHeader) {
+    todoHeader.innerHTML = `To Do <span class="inline-block bg-gray-300 text-gray-800 text-xs font-bold px-2 py-1 rounded ml-2 align-middle">${counts["To Do"] || 0}</span>`;
+  }
+  // In Progress
+  let inProgressHeader = document.querySelector('div > h3.text-lg.font-bold.mb-4.text-blue-700');
+  if (inProgressHeader) {
+    inProgressHeader.innerHTML = `In Progress <span class="inline-block bg-blue-200 text-blue-800 text-xs font-bold px-2 py-1 rounded ml-2 align-middle">${counts["In Progress"] || 0}</span>`;
+  }
+  // Done
+  let doneHeader = document.querySelector('div > h3.text-lg.font-bold.mb-4.text-green-700');
+  if (doneHeader) {
+    doneHeader.innerHTML = `Done <span class="inline-block bg-green-200 text-green-800 text-xs font-bold px-2 py-1 rounded ml-2 align-middle">${counts.Done || 0}</span>`;
+  }
 }
 
 // Fungsi untuk menyiapkan fungsionalitas drag and drop pada kolom-kolom Kanban
@@ -213,8 +255,8 @@ window.loadSelectedProject = function () {
     currentProjectName = selectedProject;
     localStorage.setItem("lastProject", selectedProject);
     sessionStorage.setItem("lastSelectedKanbanProject", selectedProject);
-    // Redirect jika kamu ingin kembali ke halaman proyek
-    window.location.href = `project.html?name=${encodeURIComponent(selectedProject)}`;
+    // Redirect ke halaman proyek dengan parameter 'project'
+    window.location.href = `project.html?project=${encodeURIComponent(selectedProject)}`;
   } else {
     displayMessageBox("Mohon pilih proyek terlebih dahulu.");
     currentProjectName = "";
@@ -229,20 +271,11 @@ document.addEventListener("DOMContentLoaded", () => {
   populateProjectDropdown(); 
 
   // Logic untuk menentukan proyek yang akan dimuat saat pertama kali halaman dibuka
-  const projectToLoad = getActiveProject();
-  const lastSelectedFromSession = sessionStorage.getItem('lastSelectedKanbanProject');
-  const projectsAvailable = getProjects(); // Ambil daftar proyek yang tersedia
+  let projectToLoad = getActiveProject();
+  const projectsAvailable = getAllSetupProjects(); // Ambil daftar proyek yang tersedia
 
-  // Prioritas 1: Proyek dari URL
-  if (projectFromURL && projectsAvailable.includes(projectFromURL)) { // Cek jika nama proyek string ada di array string
-    projectToLoad = projectFromURL;
-  } 
-  // Prioritas 2: Proyek dari sessionStorage (jika tidak ada di URL atau URL tidak valid)
-  else if (lastSelectedFromSession && projectsAvailable.includes(lastSelectedFromSession)) { // Cek jika nama proyek string ada di array string
-    projectToLoad = lastSelectedFromSession;
-  }
-
-  if (projectToLoad) {
+  // Prioritas: Proyek dari URL (parameter 'project')
+  if (projectToLoad && projectsAvailable.includes(projectToLoad)) {
     currentProjectName = projectToLoad;
     document.getElementById("projectSelect").value = projectToLoad; // Set dropdown value
     renderKanbanBoard();
